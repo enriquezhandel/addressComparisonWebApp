@@ -1,0 +1,33 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt || pip install django pymongo pandas python-dotenv
+    - name: Run tests
+      env:
+        MONGO_URI: mongodb://localhost:27017/test
+        MONGO_DATABASE: test
+        MONGO_COLLECTION: test
+      run: |
+        python manage.py test hello
