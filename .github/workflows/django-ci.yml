@@ -30,4 +30,5 @@ jobs:
         MONGO_DATABASE: test
         MONGO_COLLECTION: test
       run: |
-        python manage.py test hello
+        python manage.py collectstatic --noinput
+        python manage.py test address_comparison_app
