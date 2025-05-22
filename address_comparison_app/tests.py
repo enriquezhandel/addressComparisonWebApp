@@ -33,7 +33,7 @@ class DataHandlerTests(unittest.TestCase):
         self.assertTrue(df.empty)
 
 class MongoDBSourceTests(unittest.TestCase):
-    @patch('hello.data_handler.MongoClient')
+    @patch('address_comparison_app.data_handler.MongoClient')
     def test_fetch_data(self, mock_client):
         mock_collection = MagicMock()
         mock_collection.find.return_value = [{'_id': '1'}]
@@ -44,7 +44,7 @@ class MongoDBSourceTests(unittest.TestCase):
 
 class GetItemFilterTests(unittest.TestCase):
     def test_get_item(self):
-        from .templatetags.custom_filters import get_item
+        from address_comparison_app.templatetags.custom_filters import get_item
         d = {'a': 1}
         self.assertEqual(get_item(d, 'a'), 1)
         self.assertEqual(get_item(d, 'b'), '')
@@ -53,19 +53,19 @@ class ViewTests(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
-    @patch('hello.views.DataHandler')
-    @patch('hello.views.MongoDBSource')
+    @patch('address_comparison_app.views.DataHandler')
+    @patch('address_comparison_app.views.MongoDBSource')
     def test_mongo_query_view_post(self, MockSource, MockHandler):
         mock_handler = MockHandler.return_value
         mock_handler.fetch_data.return_value = []
         mock_handler.normalize_addresses.return_value = MagicMock(to_dict=lambda orient: [])
-        request = self.factory.post('/hello/mongo/', {'ids': '123', 'loqate_filter': 'on'})
+        request = self.factory.post('/address-comparison/mongo/', {'ids': '123', 'loqate_filter': 'on'})
         response = views.mongo_query_view(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Results', response.content)
 
-    def test_hello_world(self):
-        request = self.factory.get('/hello/')
-        response = views.hello_world(request)
+    def test_health_check(self):
+        request = self.factory.get('/address-comparison/')
+        response = views.health_check(request)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Hello, world!', response.content)
+        self.assertIn(b'OK', response.content)

@@ -11,11 +11,11 @@ MONGO_CONFIG = {
     'collection': os.environ.get('MONGO_COLLECTION', '')
 }
 
-def hello_world(request):
+def health_check(request):
     """
-    Simple hello world endpoint for health check or landing page.
+    Simple health check endpoint for the application.
     """
-    return HttpResponse("Hello, world!")
+    return HttpResponse("OK")
 
 def mongo_query_view(request):
     """
@@ -79,4 +79,4 @@ def mongo_query_view(request):
         'selected_columns': columns,
         'loqate_checked': loqate_checked
     })
-    return render(request, 'hello/mongo_query.html', context)
+    return render(request, 'address_comparison_app/mongo_query.html', context)

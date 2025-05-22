@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class HelloConfig(AppConfig):
+class AddressComparisonAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'hello'
+    name = 'address_comparison_app'
