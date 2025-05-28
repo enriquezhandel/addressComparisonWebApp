@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="main">
+    <h2>CDS Lookup</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Lookup</button>
+    </form>
+    {% if error %}
+        <div class="error">Error: {{ error }}</div>
+    {% endif %}
+    {% if result is not None and not result.empty %}
+        <h3>Results</h3>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        {% for col in result.columns %}
+                        <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in result.values %}
+                    <tr>
+                        {% for val in row %}
+                        <td>{{ val }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

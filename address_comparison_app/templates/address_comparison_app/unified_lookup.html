@@ -1,0 +1,362 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unified Data Lookup</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'GT America', 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: #FFFFFF;
+            color: #000000;
+        }
+        .header {
+            background: #0A1264;
+            color: #FFFFFF;
+            padding: 1.5em 2em 1.5em 220px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .header-title {
+            font-size: 2em;
+            font-family: 'Financier Display', 'Segoe UI', Arial, sans-serif;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #FFFFFF;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: 200px;
+            background: #0A1264;
+            color: #fff;
+            padding-top: 2em;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+        }
+        .sidebar h2 {
+            font-size: 1.2em;
+            margin: 0 0 2em 1em;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0 1em;
+        }
+        .sidebar ul li {
+            margin-bottom: 1.5em;
+        }
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1em;
+            transition: color 0.2s;
+        }
+        .sidebar ul li a:hover {
+            color: #005EFF;
+        }
+        .main {
+            margin-left: 220px;
+            padding: 2em 3em;
+        }
+        .form-section {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(50,87,168,0.10);
+            padding: 2.5em 2em 2em 2em;
+            max-width: 700px;
+            margin-bottom: 2em;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        label {
+            display: block;
+            margin-top: 1em;
+            font-weight: 500;
+            font-family: 'GT America', 'Segoe UI', Arial, sans-serif;
+            color: #0A1264;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.9em;
+            border: 1.5px solid #3257A8;
+            border-radius: 7px;
+            margin-top: 0.2em;
+            font-size: 1.08em;
+            font-family: 'GT America', 'Segoe UI', Arial, sans-serif;
+            background: #F4F6FA;
+            transition: border 0.2s;
+        }
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border: 2px solid #005EFF;
+            background: #A4DDEE22;
+        }
+        button {
+            background: #0A1264;
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 0.9em 2.2em;
+            font-size: 1.08em;
+            margin-top: 1.5em;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            font-family: 'GT America', 'Segoe UI', Arial, sans-serif;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(50,87,168,0.08);
+        }
+        button:hover {
+            background: #3257A8;
+        }
+        .error {
+            color: #BA0C2F;
+            margin-top: 1em;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .result {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(50,87,168,0.10);
+            padding: 2.5em 2em 2em 2em;
+            margin-top: 2em;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 98vw;
+        }
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            margin-top: 1em;
+            font-family: 'GT America', 'Segoe UI', Arial, sans-serif;
+            font-size: 1em;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: none;
+            padding: 0.7em 0.5em;
+            text-align: left;
+        }
+        th {
+            background: #0A1264;
+            color: #fff;
+            font-family: 'Financier Display', 'Segoe UI', Arial, sans-serif;
+            font-size: 1em;
+            font-weight: 600;
+            border-bottom: 3px solid #005EFF;
+        }
+        tr {
+            background: #fff;
+            transition: background 0.2s;
+        }
+        tr:hover {
+            background: #A4DDEE;
+        }
+        td {
+            border-bottom: 1.5px solid #A4DDEE;
+        }
+        /* Custom styles for tooltips and spinner */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #0A1264;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 0.5em 1em;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.95em;
+        }
+        .tooltip:focus .tooltiptext,
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0A1264;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media (max-width: 900px) {
+            .main { padding: 1em 0.5em; }
+            .form-section, .result { padding: 1.2em 0.5em; }
+            table { font-size: 0.95em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Data Remediation</h2>
+        <ul>
+            <li><a href="/address-comparison/mongo/">MongoDB Query</a></li>
+            <li><a href="/address-comparison/cds-lookup/">CDS API Lookup</a></li>
+            <li><a href="#">Admin</a></li>
+            <li><a href="#">Reports</a></li>
+            <li><a href="#">Batch Processing</a></li>
+        </ul>
+    </div>
+    <div class="header">
+        <span class="header-title">Mastering: Data Remediation</span>
+    </div>
+    <div class="main">
+        <div class="form-section bg-white rounded-xl shadow-lg p-8 max-w-xl mx-auto mb-8">
+            <form method="post" id="queryForm" class="space-y-6" autocomplete="off">
+                {% csrf_token %}
+                <div class="mb-6">
+                    <label for="id_data_source" class="block text-base font-semibold text-gray-700 mb-2">Data Source</label>
+                    <div class="w-full">{{ form.data_source }}</div>
+                </div>
+                <div class="mb-6">
+                    <label for="id_identifier" class="block text-base font-semibold text-gray-700 mb-2 flex items-center">
+                        Entity/BVD ID
+                        <span class="ml-1 tooltip" tabindex="0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke="currentColor" stroke-width="2" d="M12 16v-4m0-4h.01"/></svg>
+                            <span class="tooltiptext">Enter a numeric entity ID (e.g., 100927064) or a MongoDB _id.</span>
+                        </span>
+                    </label>
+                    <input type="text" name="identifier" id="id_identifier" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-lg px-4 py-3 bg-gray-50" placeholder="e.g. 100927064 or MongoDB _id" value="{{ form.identifier.value|default:'' }}" required pattern="[\w\-\*]+" aria-describedby="identifierHelp" />
+                </div>
+                <div class="mb-6">
+                    <button type="button" class="text-blue-600 text-sm focus:outline-none" onclick="toggleAdvanced()" aria-expanded="false" aria-controls="advancedOptions">Advanced Options</button>
+                </div>
+                <div id="advancedOptions" class="hidden mb-6 border-t pt-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="loqate_filter" id="id_loqate_filter" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" {% if loqate_checked %}checked{% endif %} />
+                        <label for="id_loqate_filter" class="ml-2 block text-base font-semibold text-gray-700 flex items-center">
+                            Loqate Only
+                            <span class="ml-1 tooltip" tabindex="0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke="currentColor" stroke-width="2" d="M12 16v-4m0-4h.01"/></svg>
+                                <span class="tooltiptext">Filters results to only standardized addresses using Loqate (prefix 'L').</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button type="submit" id="lookupBtn" class="inline-flex items-center px-8 py-3 border border-transparent text-lg font-bold rounded-md shadow-sm text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition w-full justify-center">
+                        <span id="lookupBtnText">Lookup</span>
+                        <span id="lookupSpinner" class="ml-2 hidden spinner"></span>
+                    </button>
+                </div>
+            </form>
+            {% if error %}
+                <div class="error mt-4">Error: {{ error }}</div>
+            {% endif %}
+        </div>
+        {% if result and columns %}
+        <div class="result">
+            <h2 style="margin-bottom: 1em; color: #0a1e5c; font-size: 1.5em; font-weight: 600; letter-spacing: 1px;">Results</h2>
+            <div style="overflow-x:auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                <table style="background: #fff;">
+                    <thead>
+                        <tr style="background: #0a1e5c; color: #fff;">
+                            {% for col in columns %}
+                            <th style="padding: 0.7em 0.5em; font-size: 1em; font-weight: 600; border: none;">{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in result %}
+                        <tr style="transition: background 0.2s; cursor: pointer;" onmouseover="this.style.background='#e3eafc'" onmouseout="this.style.background='#fff'">
+                            {% for col in columns %}
+                            <td style="padding: 0.5em; border: none; border-bottom: 1px solid #e3eafc; font-size: 0.98em;">{{ row|get_item:col }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        {% if address_comparison %}
+        <div class="result">
+            <h2 style="margin-bottom: 1em; color: #0a1e5c; font-size: 1.5em; font-weight: 600; letter-spacing: 1px;">Address Comparison</h2>
+            {% for group in address_comparison %}
+            <div style="margin-bottom:2em;">
+                <div style="font-weight:700; color:#0A1264; font-size:1.1em; margin-bottom:0.5em;">_id: {{ group.id }}</div>
+                {% for address in group.addresses %}
+                <div style="margin-bottom:1em;">
+                    <div style="font-weight:600; color:#3257A8; margin-bottom:0.2em;">Address{{ forloop.counter0 }}:</div>
+                    <table style="border-collapse:collapse; width:100%; margin-bottom:0.5em;">
+                        <tr>
+                            <td style="font-weight:500; color:#0A1264;">reported_address_lines</td>
+                            <td>{{ address.reported_address_lines }}</td>
+                            <td style="font-weight:500; color:#0A1264;">standardized_address_lines</td>
+                            <td>{{ address.standardized_address_lines }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:500; color:#0A1264;">reported_city</td>
+                            <td>{{ address.reported_city }}</td>
+                            <td style="font-weight:500; color:#0A1264;">standardized_locality</td>
+                            <td>{{ address.standardized_locality }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:500; color:#0A1264;">reported_post_code</td>
+                            <td>{{ address.reported_post_code }}</td>
+                            <td style="font-weight:500; color:#0A1264;">standardized_postal_code</td>
+                            <td>{{ address.standardized_postal_code }}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:500; color:#0A1264;">reported_country_label</td>
+                            <td>{{ address.reported_country_label }}</td>
+                            <td style="font-weight:500; color:#0A1264;">standardized_country_name</td>
+                            <td>{{ address.standardized_country_name }}</td>
+                        </tr>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <script>
+        function toggleAdvanced() {
+            var adv = document.getElementById('advancedOptions');
+            var btn = event.target;
+            if (adv.classList.contains('hidden')) {
+                adv.classList.remove('hidden');
+                btn.setAttribute('aria-expanded', 'true');
+            } else {
+                adv.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        }
+        document.getElementById('queryForm').addEventListener('submit', function(e) {
+            var btn = document.getElementById('lookupBtn');
+            var text = document.getElementById('lookupBtnText');
+            var spinner = document.getElementById('lookupSpinner');
+            btn.disabled = true;
+            text.textContent = 'Looking up...';
+            spinner.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
